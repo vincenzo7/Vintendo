@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using System.Configuration;
+using System.Xml.Serialization;
 using Engine.Components;
 using UnityEngine;
 
@@ -6,18 +8,33 @@ namespace Engine.Player.States
 {
     public class GamePlayerState
     {
+        public bool Active = false;
+
         public virtual void HandleState(GamePlayer player)
         {
         }
     }
 
-    public class BuildState : GamePlayerState
+    public class BuildStateSettings
     {
-        public bool Active = false;
+        public float CoolDown; 
+     
+        public BuildStateSettings(float coolDown = 0.1f)
+        {
+            CoolDown = coolDown;
+        }
+    }
 
-        private float CoolDown = 0.1f;
-
+    public class BuildState : GamePlayerState
+    {     
         private Transform StructureRoot;
+
+        private BuildStateSettings Settings;
+
+        public BuildState(BuildStateSettings bss)
+        {
+            Settings = bss;
+        }
 
         public override void HandleState(GamePlayer player)
         {
@@ -66,7 +83,7 @@ namespace Engine.Player.States
                     player.Data.LastBlock = StructureRoot;
                 }
 
-                yield return new WaitForSeconds(CoolDown);
+                yield return new WaitForSeconds(Settings.CoolDown);
             }
 
             player.Data.LastState = this;
@@ -74,11 +91,24 @@ namespace Engine.Player.States
         }
     }
 
-    public class TiltStructureState : GamePlayerState
+    public class TiltStructurStateSettings
     {
-        public bool Active = false;
+        public float RotationSpeed;
 
-        private float StateDuration = 0f;
+        public TiltStructurStateSettings(float rotationSpeed = 2f)
+        {
+            RotationSpeed = rotationSpeed;
+        }
+    }
+
+    public class TiltStructureState : GamePlayerState
+    {       
+        private TiltStructurStateSettings Settings;
+
+        public TiltStructureState(TiltStructurStateSettings settings)
+        {
+            Settings = settings;
+        }
 
         public override void HandleState(GamePlayer player)
         {
@@ -95,7 +125,15 @@ namespace Engine.Player.States
             {
                 if (player.Data.RootBuildableNode != null)
                 {
-                    player.Data.RootBuildableNode.Rotate(0, 0, (player.Data.Left) ? 2 : -2);
+                    player
+                        .Data
+                        .RootBuildableNode
+                        .Rotate(
+                            0, 
+                            0, 
+                            (player.Data.Left) 
+                                ? Settings.RotationSpeed 
+                                : -Settings.RotationSpeed);
                 }
                 else
                 {
@@ -108,9 +146,34 @@ namespace Engine.Player.States
         }
     }
 
+    public class AutoWalkStateSettings
+    {
+        public float xMax;
+        public float xMin;
+        public float yMax;
+        public float yMin;
+        public float Speed;
+
+        public AutoWalkStateSettings(float xmax = 15f, float xmin = 5f, float ymax = 10f, float ymin = 5f, float speed = 5f)
+        {
+            xMax = xmax;
+            xMin = xmin;
+            yMax = ymax;
+            yMin = ymin;
+            Speed = speed;
+        }
+    }
+
     public class AutoWalkState : GamePlayerState
     {
         public StepTarget TargetStep;
+
+        private AutoWalkStateSettings Settings;
+
+        public AutoWalkState(AutoWalkStateSettings settings)
+        {
+            Settings = settings;
+        }
 
         public override void HandleState(GamePlayer player)
         {
@@ -119,9 +182,10 @@ namespace Engine.Player.States
                     player.Data.StepPrefab,
                     new Vector3(
                         TargetStep.transform.position.x + ((
-                                ((Random.Range(0, 4) % 2 == 0) ? -1 : 1) * Random.Range(5f, 15f)
+                                ((Random.Range(0, 4) % 2 == 0) ? -1 : 1) 
+                                * Random.Range(Settings.xMin, Settings.xMax)
                             )),
-                        TargetStep.transform.position.y + (Random.Range(5f, 10f)),
+                        TargetStep.transform.position.y + (Random.Range(Settings.yMin, Settings.yMax)),
                         TargetStep.transform.position.z),
                     Quaternion.identity) as GameObject;
 
@@ -143,7 +207,7 @@ namespace Engine.Player.States
                 player.transform.position = Vector3.MoveTowards(
                     player.transform.position,
                     pos,
-                    10f * Time.deltaTime);
+                    Settings.Speed * Time.deltaTime);
 
                 yield return null;
 
@@ -164,8 +228,30 @@ namespace Engine.Player.States
 
     public class PlayerStates
     {
-        public BuildState Build = new BuildState();
-        public TiltStructureState TiltState = new TiltStructureState();
-        public AutoWalkState AutoWalk = new AutoWalkState();
+        public BuildState Build = new BuildState(
+            new BuildStateSettings(
+                coolDown: 0.1f
+            ));
+
+        public TiltStructureState TiltState = new TiltStructureState(
+            new TiltStructurStateSettings(
+                rotationSpeed: 2f
+            ));
+
+        public AutoWalkState AutoWalk = new AutoWalkState(
+            new AutoWalkStateSettings(
+                xmax: 15f, 
+                xmin: 5f, 
+                ymax: 10f,
+                ymin: 5f, 
+                speed: 15f
+            ));
+
+        public PlayerStates(BuildState bs, TiltStructureState ts, AutoWalkState aw)
+        {
+            Build = bs;
+            TiltState = ts;
+            AutoWalk = aw;
+        }
     }
 }

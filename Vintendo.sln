@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 
 Project("{CB457730-E03A-ADE5-69AF-FEB56742F5B4}") = "Vintendo", "Assembly-CSharp.csproj", "{99B2699A-1594-3414-8F88-E83B293EEAEF}"
 EndProject
+Project("{CB457730-E03A-ADE5-69AF-FEB56742F5B4}") = "Vintendo", "Assembly-CSharp-Editor.csproj", "{71E1028D-C4C3-6EF1-2532-A9C3E7C67356}"
+EndProject
 Project("{CB457730-E03A-ADE5-69AF-FEB56742F5B4}") = "Vintendo", "Assembly-UnityScript.unityproj", "{D67335E6-4502-8733-EF2C-7B77D2EF4F12}"
 EndProject
 Global
@@ -15,6 +17,10 @@ Global
 		{99B2699A-1594-3414-8F88-E83B293EEAEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99B2699A-1594-3414-8F88-E83B293EEAEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99B2699A-1594-3414-8F88-E83B293EEAEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71E1028D-C4C3-6EF1-2532-A9C3E7C67356}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71E1028D-C4C3-6EF1-2532-A9C3E7C67356}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71E1028D-C4C3-6EF1-2532-A9C3E7C67356}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71E1028D-C4C3-6EF1-2532-A9C3E7C67356}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D67335E6-4502-8733-EF2C-7B77D2EF4F12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D67335E6-4502-8733-EF2C-7B77D2EF4F12}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D67335E6-4502-8733-EF2C-7B77D2EF4F12}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -23,7 +29,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-																													GlobalSection(MonoDevelopProperties) = preSolution
+																																	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Assembly-CSharp.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1

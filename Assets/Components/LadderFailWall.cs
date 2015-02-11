@@ -8,7 +8,10 @@ namespace Engine.Components
     {
         private void OnCollisionEnter(Collision col)
         {
-            GamePlayer.Instance.RemoveLadder();
+            if (col.gameObject.tag == "Buildable" && GamePlayer.Instance.Data.CurrentState == null)
+            {
+                GamePlayer.Instance.RemoveLadder();
+            }
         }
     }
 }

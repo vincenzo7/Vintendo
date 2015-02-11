@@ -34,15 +34,30 @@ namespace Engine.Player
             public GamePlayerState LastState = null;
         }
 
+        [System.Serializable]
+        public class StateSettings
+        {
+            public float BuildStateCooldown;
+
+            public float TiltStateRotationSpeed;
+
+            public float AutoWalkXMax;
+            public float AutoWalkXMin;
+            public float AutoWalkYMax;
+            public float AutoWalkYMin;
+
+            public float Speed;
+        }
+
         public delegate void StepTargetHit(StepTarget step);
 
         public static StepTargetHit OnSetTargetHit;
         
         public static GamePlayer Instance;
 
-        public PlayerStates PlayerStates = new PlayerStates();
+        public PlayerStates PlayerStates;
 
-        public List<KeyValuePair<int, List<GameObject>>> StepSpawnNodes; 
+        public StateSettings PlayerStateSettings;
 
         public Buildables Buildable;
 
@@ -51,7 +66,8 @@ namespace Engine.Player
         private void Awake()
         {
             Instance = this;
-            GamePlayer.OnSetTargetHit += AutoWalk;
+            GamePlayer.OnSetTargetHit += Instance.AutoWalk;
+            Instance.PlayerStates = Instance.InitPlayerStates();
         }
 
         public virtual void Build()
@@ -61,8 +77,7 @@ namespace Engine.Player
 
         public virtual void TiltStructure()
         {
-            Instance.PlayerStates.Build.Active = false;
-            Instance.Data.CurrentState = null;
+            Instance.DeactivateState(Instance.PlayerStates.Build);
             Instance.HandleState(Instance.PlayerStates.TiltState);
         }
 
@@ -71,9 +86,7 @@ namespace Engine.Player
             if (Instance.Data.CurrentState != Instance.PlayerStates.AutoWalk && Instance.Data.LastState == Instance.PlayerStates.TiltState)
             {
                 Instance.Data.LastState = Instance.PlayerStates.AutoWalk;
-                Instance.PlayerStates.TiltState.Active = false;
-                Instance.Data.CurrentState = null;
-
+                Instance.DeactivateState(Instance.PlayerStates.TiltState);
                 Instance.PlayerStates.AutoWalk.TargetStep = step;
                 Instance.HandleState(Instance.PlayerStates.AutoWalk);
             }
@@ -81,8 +94,7 @@ namespace Engine.Player
 
         public virtual void RemoveLadder()
         {
-            Instance.PlayerStates.TiltState.Active = false;
-            Instance.Data.CurrentState = null;
+            Instance.DeactivateState(Instance.PlayerStates.TiltState);
             Instance.Data.LastBlockPosition = Vector3.zero;
 
             Instance.StartCoroutine(Instance.crRemoveLadderUpdate());
@@ -126,6 +138,34 @@ namespace Engine.Player
                 }
                 yield return null;
             }
+        }
+
+        private void DeactivateState(GamePlayerState state) 
+        {
+            state.Active = false;
+            Instance.Data.CurrentState = null;
+        }
+
+        private PlayerStates InitPlayerStates()
+        {
+            return new PlayerStates(
+                new BuildState(
+                    new BuildStateSettings(
+                      coolDown: Instance.PlayerStateSettings.BuildStateCooldown
+                )),
+                new TiltStructureState(
+                    new TiltStructurStateSettings(
+                        rotationSpeed: Instance.PlayerStateSettings.TiltStateRotationSpeed
+                )),
+                new AutoWalkState(
+                    new AutoWalkStateSettings(
+                        xmax:  Instance.PlayerStateSettings.AutoWalkXMax,
+                        xmin:  Instance.PlayerStateSettings.AutoWalkXMin,
+                        ymax:  Instance.PlayerStateSettings.AutoWalkYMax,
+                        ymin:  Instance.PlayerStateSettings.AutoWalkYMin,
+                        speed: Instance.PlayerStateSettings.Speed
+                    ))
+                );
         }
     }
 }
